@@ -2,4 +2,3 @@ transformers
 torch
 sentence_transformers
 streamlit
-torch.nn.functional
