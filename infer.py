@@ -4,30 +4,6 @@ import torch
 from sentence_transformers import SentenceTransformer
 from torch.nn.functional import cosine_similarity
 
-'''
-# BM25
-print("BM25")
-# LegalBert
-legalbert_tokenizer = AutoTokenizer.from_pretrained("nlpaueb/legal-bert-base-uncased")
-legalbert_model = AutoModel.from_pretrained("nlpaueb/legal-bert-base-uncased")
-
-# SAILER
-
-# DELTA
-tokenizer = AutoTokenizer.from_pretrained("CSHaitao/DELTA_EN")
-delta_model = AutoModel.from_pretrained("CSHaitao/DELTA_EN")
-
-
-with open("processed_cases\\test3.json", encoding='utf-8') as f:
-    data = json.load(f)
-
-print("Extracting facts ... ")
-legal_facts = "Legal facts: " + extract_facts(truncate(data['roles']['Facts'], 5000))
-print("Extracting issues ... ")
-legal_issues = "Legal issues: " + extract_issue(truncate(data['roles']['Issue'], 5000))
-
-print(legal_facts)
-print(legal_issues)'''
 
 # takes in text and returns normalised DELTA sentence embedding
 def get_delta_embeddings(delta_model, delta_tokenizer, text):
