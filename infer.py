@@ -1,6 +1,4 @@
 import json, os 
-#from summarise import *
-#from classify_role import truncate
 from transformers import AutoTokenizer, AutoModel
 import torch
 from sentence_transformers import SentenceTransformer
