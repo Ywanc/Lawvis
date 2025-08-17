@@ -32,7 +32,7 @@ if search_mode == "**Facts**":
     if st.button("Search"):
         if query:
             with st.spinner("Searching ... "):
-                results = search_facts(query, k=7) # list of (file, sim_score)
+                results = search_facts(query, k=5) # list of (file, sim_score)
                 
             for case, sim_score in results:
                 link = case['download link']
@@ -56,7 +56,7 @@ elif search_mode == "**Issues**":
     if st.button("Search"):
         if query:
             with st.spinner("Searching ... "):
-                results = search_issues(query, k=7) # list of (file, sim_score)
+                results = search_issues(query, k=5) # list of (file, sim_score)
                 
             for case, sim_score in results:
                 link = case['download link']

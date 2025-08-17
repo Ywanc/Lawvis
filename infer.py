@@ -22,7 +22,7 @@ def get_delta_embeddings(delta_model, delta_tokenizer, text):
     cls_embedding = torch.nn.functional.normalize(cls_embedding, p=2, dim=1)
     return cls_embedding
 
-def search_facts(query_facts, folderpath="SG_cases\\processed_v3", k=5):
+def search_facts(query_facts, folderpath="/mount/src/lawvis/SG_cases/processed_v3", k=5):
 
     #delta_tokenizer = AutoTokenizer.from_pretrained("CSHaitao/DELTA_EN")
     #delta_model = AutoModel.from_pretrained("CSHaitao/DELTA_EN")
@@ -54,7 +54,7 @@ def search_facts(query_facts, folderpath="SG_cases\\processed_v3", k=5):
     result = sorted(similarities, key=lambda x: x[1], reverse=True)[:k]
     return result   
 
-def search_issues(query_issues, folderpath="SG_cases\\processed_v3", k=5):
+def search_issues(query_issues, folderpath="/mount/src/lawvis/SG_cases/processed_v3", k=5):
 
     print("retrieving candidate cases ... ")
     # retrieve candidate cases and their embeddings
