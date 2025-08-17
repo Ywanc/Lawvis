@@ -1,2 +1,2 @@
 # Lawvis
-Legal Case Retrieval
+Legal Case Retrieval using AI (Word Embeddings)
