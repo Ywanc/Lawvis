@@ -37,7 +37,7 @@ def search_facts(query_facts, folderpath="/mount/src/lawvis/SG_cases/processed_v
             
     cand_cases = []
     for file in files:
-        with open(f'{folderpath}\\{file}', 'r', encoding='utf-8') as f:
+        with open(f'{folderpath}/{file}', 'r', encoding='utf-8') as f:
             data = json.load(f)
         cand_cases.append((data, torch.tensor(data['facts_embeddings'])))
     
@@ -65,7 +65,7 @@ def search_issues(query_issues, folderpath="/mount/src/lawvis/SG_cases/processed
             
     cand_cases = []
     for file in files:
-        with open(f'{folderpath}\\{file}', 'r', encoding='utf-8') as f:
+        with open(f'{folderpath}/{file}', 'r', encoding='utf-8') as f:
             data = json.load(f)
         cand_cases.append((data, torch.tensor(data['issues_embeddings'])))
     
