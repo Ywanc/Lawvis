@@ -1,0 +1,4 @@
+transformers
+torch
+sentence_transformers
+streamlit
