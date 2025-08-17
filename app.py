@@ -3,14 +3,30 @@ from infer import *
 
 st.title("AI Case Search")
 
+description = """
+An AI-powered legal case search system that matches legal cases based on Facts or Issue similarity.
 
-with st.expander(f"Description"):
-    st.write("An AI-powered legal case search system that uses the power of word embeddings to match similar legal cases.\n To use, choose your mode of search, either search by facts . The system will return the top 5 most relevant cases based on the case facts you gave, along with a brief summary of the case.")
-    st.write("The system only has a limited amount of cases for testing. Inaccuries in search result may be due to the lack of cases.")
+Current prototype only contains around 150 Singapore cases from 2024 to 2025. Inaccuries in search may be due to low variety of cases. 
+"""
 
-search_mode = st.radio("Search by:", ["Facts", "Issues"])
+how_to_use = """
+**Step 1**: Choose either to search by **Facts** or **Issues**
 
-if search_mode == "Facts":
+**Step 2**: Enter your Facts/Issues to search for similar case, press the Search button.
+
+**Step 3**: Hopefully the system will return cases similar to your Facts/Issues.
+"""
+
+
+with st.expander("Description"):
+    st.write(description)
+    #st.write("The system only has a limited amount of cases for testing. Inaccuries in search result may be due to the lack of cases.")
+
+with st.expander("How to use"):
+    st.write(how_to_use)
+search_mode = st.radio("Search by:", ["**Facts**", "**Issues**"])
+
+if search_mode == "**Facts**":
     query = st.text_area("**Enter Your case facts:** ", placeholder="E.g. Client was alleged to have illegally brought in foreign workers and faking employment passes.")
 
     if st.button("Search"):
@@ -34,7 +50,7 @@ if search_mode == "Facts":
         else:
             st.warning("Please enter your case facts.")
 
-elif search_mode == "Issues":
+elif search_mode == "**Issues**":
     query = st.text_area("**Enter Your case Issue:** ", placeholder="E.g. The main dispute is whether the Defendants' representations misled the Plaintiff.")
 
     if st.button("Search"):
