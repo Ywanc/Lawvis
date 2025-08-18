@@ -14,7 +14,7 @@ how_to_use = """
 
 **Step 2**: Enter your Facts/Issues to search for similar case, press the Search button.
 
-**Step 3**: Hopefully the system will return cases similar to your Facts/Issues.
+**Step 3**: Hopefully the system will return top 5 cases that are most similar to your Facts/Issues.
 """
 
 
