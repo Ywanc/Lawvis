@@ -10,6 +10,7 @@ def show_case(case, sim_score):
         st.markdown(
             f"<div style='font-size: 14px; font-family: 'Source Sans Pro', sans-serif;'>"
             f"<b>Facts Summary:</b><br> {case_facts}<br><br>"
+            f"<b>Issues Summary:</b><br> {case['elements']['Legal Issues']}<br><br>"
             f"<a href='{case['download link']}' target='_blank'>Download PDF</a>"
             f"</div>",
             unsafe_allow_html=True
