@@ -1,9 +1,16 @@
-from langchain_ollama import ChatOllama
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def route_query(query):
-    model = ChatOllama(model="qwen3:4b", temperature=0)
+model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    torch_dtype="auto",
+    device_map="auto"
+)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+
+def route_query(model, query):
     system_prompt = """
     You are an legal expert. Given a user query about a legal case, classify it into ONE of the rhetorical role. 
     
@@ -16,34 +23,61 @@ def route_query(query):
     Given a section title and text, classify it into **one of the rhetorical roles above**.
     Always return **only** the rhetorical role exactly as listed above, do not include any explanations.
     """   
-    
-    prompt_template = ChatPromptTemplate.from_messages([
-        ('system', system_prompt),
-        ('human', "Classify this query: {query}")
-    ])
-    
-    chain = prompt_template | model | StrOutputParser()
-    response = chain.invoke({"query": query})
-    print(response.split('</think>', 1)[1].strip())
-    return response.split('</think>', 1)[1].strip()
 
-def answer(case, context, question):
-    chat_model = ChatOllama(model="qwen3:4b", temperature=0.1, num_ctx=20000)
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"Classify this query: {query}"}
+    ]
+    text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
 
+    generated_ids = model.generate(
+        **model_inputs,
+        max_new_tokens=512
+    )
+    
+    generated_ids = [
+        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+    ]
+
+    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    return response
+
+def answer(model, case, context, question):
     system_prompt = f"You are a legal assistant, handling queries on the legal case {case['title']}. Keep your response short and concise, **admit if you are not sure**."
-    prompt_template = ChatPromptTemplate.from_messages([
-        ('system', system_prompt),
-        ("system", "Here is the case you must use as reference:\n{context}"),
-        ('human', "{question}")
-    ])
+    
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "system", "content": f"Here is the case you must use as reference:\n{context}"},
+        {"role": "user", "content": f"{question}"}
+    ]
+    
+    text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
 
-    chain = prompt_template | chat_model | StrOutputParser()
-    response = chain.invoke({"context": context, "question": question})
-    return response.split('</think>', 1)[1].strip()
+    generated_ids = model.generate(
+        **model_inputs,
+        max_new_tokens=512
+    )
+    
+    generated_ids = [
+        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+    ]
+
+    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    return response
 
 def chat(query, case):
     yield "Analysing query ..."
-    role = route_query(query)
+    role = route_query(model, query)
     
     yield "Getting relevant context ..."
     context = case['roles'].get(role, "")
@@ -57,5 +91,6 @@ def chat(query, case):
     else:
         yield f"Analyzing {role} ..."
         
-    for chunk in answer(case, context, query).split(" "):
+    for chunk in answer(model, case, context, query).split(" "):
         yield chunk + " "
+    
