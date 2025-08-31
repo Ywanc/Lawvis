@@ -3,6 +3,8 @@ from infer import *
 from chat import *
 import time
 
+model, tokenizer = load_model()
+
 # show a case in search results
 def show_case(case, sim_score):
     def select_case(case):
@@ -70,7 +72,7 @@ def chatbot_sidebar(case):
                     spinner_placeholder = st.empty()
                     
                     full_response = ""
-                    for update in chat(case=case, query=user_query):
+                    for update in chat(model=model, tokenizer=tokenizer, case=case, query=user_query):
                         if update.endswith("..."):
                             spinner_placeholder.markdown(f"{update}")
                         else:

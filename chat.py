@@ -1,16 +1,17 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import streamlit as st
 
-model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+@st.cache_resource
+def load_model():
+    model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype="auto",
+    )
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    return model, tokenizer
 
-model = AutoModelForCausalLM.from_pretrained(
-    model_name,
-    torch_dtype="auto",
-    device_map="auto"
-)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-
-def route_query(model, query):
+def route_query(model, tokenizer, query):
     system_prompt = """
     You are an legal expert. Given a user query about a legal case, classify it into ONE of the rhetorical role. 
     
@@ -47,7 +48,7 @@ def route_query(model, query):
     response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
     return response
 
-def answer(model, case, context, question):
+def answer(model, tokenizer, case, context, question):
     system_prompt = f"You are a legal assistant, handling queries on the legal case {case['title']}. Keep your response short and concise, **admit if you are not sure**."
     
     messages = [
@@ -75,9 +76,9 @@ def answer(model, case, context, question):
     response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
     return response
 
-def chat(query, case):
+def chat(model, tokenizer, query, case):
     yield "Analysing query ..."
-    role = route_query(model, query)
+    role = route_query(model, tokenizer, query)
     
     yield "Getting relevant context ..."
     context = case['roles'].get(role, "")
@@ -91,6 +92,6 @@ def chat(query, case):
     else:
         yield f"Analyzing {role} ..."
         
-    for chunk in answer(model, case, context, query).split(" "):
+    for chunk in answer(model, tokenizer, case, context, query).split(" "):
         yield chunk + " "
     
