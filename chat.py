@@ -4,6 +4,7 @@ import streamlit as st
 @st.cache_resource
 def load_model():
     model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+    print(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype="auto",

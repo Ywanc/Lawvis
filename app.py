@@ -4,7 +4,6 @@ from chat import *
 import time
 
 model, tokenizer = load_model()
-
 # show a case in search results
 def show_case(case, sim_score):
     def select_case(case):
