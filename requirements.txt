@@ -1,3 +1,6 @@
 torch
 transformers
 sentence_transformers
+langchain-ollama
+langchain-core
+langchain
