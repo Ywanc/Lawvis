@@ -10,7 +10,7 @@ def load_model():
         torch_dtype="auto",
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    return model, tokenizer
+    return model, tokenizer, model_name
 
 def route_query(model, tokenizer, query):
     system_prompt = """

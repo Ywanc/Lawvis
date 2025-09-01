@@ -4,7 +4,7 @@ from chat import *
 import time
 
 st.set_page_config(page_title="Lawvis", initial_sidebar_state="expanded")
-model, tokenizer = load_model()
+model, tokenizer, model_name = load_model()
 # show a case in search results
 def show_case(case, sim_score):
     def select_case(case):
@@ -46,7 +46,7 @@ def chatbot_sidebar(case):
     
     with st.sidebar:
         st.title("Lawvis Case QnA")
-            
+        st.write(f"model: {model_name}")
         # Display chat history
         chat_container = st.container()
         with chat_container:
