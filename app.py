@@ -85,7 +85,7 @@ def chatbot_sidebar(case):
                     spinner_placeholder = st.empty()
                     
                     full_response = ""
-                    for update in chat(model=model, tokenizer=tokenizer, case=case, query=user_query):
+                    for update in chat(client=client, model_name=model_name, case=case, query=user_query):
                         if update.endswith("..."):
                             spinner_placeholder.markdown(f"{update}")
                         else:
