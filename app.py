@@ -2,9 +2,22 @@ import streamlit as st
 from infer import *
 from chat import *
 import time
+from openai import OpenAI
 
 st.set_page_config(page_title="Lawvis", initial_sidebar_state="expanded")
-model, tokenizer, model_name = load_model()
+hf_token = st.secrets["HF_TOKEN"]
+
+@st.cache_resource
+def get_client():
+    client = OpenAI(
+        base_url="https://router.huggingface.co/v1",
+        api_key=hf_token,
+    )
+    model_name = "Qwen/Qwen2-1.5B-Instruct:featherless-ai"
+    return client, model_name
+
+client, model_name = get_client()
+
 # show a case in search results
 def show_case(case, sim_score):
     def select_case(case):

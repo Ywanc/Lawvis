@@ -1,25 +1,16 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import streamlit as st
 
-@st.cache_resource
-def load_model():
-    model_name = "Qwen/Qwen2.5-1.5B-Instruct-GPTQ-Int4"
-    print(model_name)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        torch_dtype="auto",
-    )
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    return model, tokenizer, model_name
-
-def route_query(model, tokenizer, query):
+# takes in user input, routes it to one of the roles
+def llm_route_query(client, model_name, query):
+    
     system_prompt = """
     You are an legal expert. Given a user query about a legal case, classify it into ONE of the rhetorical role. 
     
     List of Rhetorical Roles:
-    - Facts/Issues: The key legal or factual dispute and the factual background leading to it, including how the dispute arose, actions taken by the parties, identities of relevant parties, procedural history, and prior court reasoning or rulings.
-    - Courts_reasoning: The court’s analysis of legal issues, arguments from parties, and application of law. Also includes discussion of legal definitions, rules, and interpretation.
-    - Ruling: The **current** court's decision or conclusion. First identify the current court handling this case, if the ruling is by any lower court, then label is as "Facts".
+    - Facts/Issues: Background information, chronology of events, and issues in dispute. What happened? Who are the parties? What is the dispute about?
+    - Courts_reasoning : The judge’s logical analysis, legal principles applied, and explanation of how the law is interpreted. Why did the court decide like this? How does the court analyze the law? What precedents or reasoning are applied?
+    - Ruling: "The final decision or holding of the court. What did the court decide? What is the outcome?
     - Invalid: User's query isn't related to the case.
     
     Given a section title and text, classify it into **one of the rhetorical roles above**.
@@ -30,57 +21,39 @@ def route_query(model, tokenizer, query):
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": f"Classify this query: {query}"}
     ]
-    text = tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,
-        add_generation_prompt=True
-    )
-    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
-
-    generated_ids = model.generate(
-        **model_inputs,
-        max_new_tokens=512
-    )
     
-    generated_ids = [
-        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-    ]
+    response = client.chat.completions.create(
+        model=model_name, 
+        messages=messages, 
+        temperature=0,
+        max_tokens = 50
+    )
+    return response.choices[0].message.content.strip()
 
-    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-    return response
+# takes in case, context and query, generates response
+def answer(client, model_name, case, context, question):
+    system_prompt = f"You are a legal assistant, handling queries on the legal case {case['title']}. Keep your response short and concise, admit if you are not sure."
 
-def answer(model, tokenizer, case, context, question):
-    system_prompt = f"You are a legal assistant, handling queries on the legal case {case['title']}. Keep your response short and concise, **admit if you are not sure**."
-    
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "system", "content": f"Here is the case you must use as reference:\n{context}"},
-        {"role": "user", "content": f"{question}"}
-    ]
-    
-    text = tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,
-        add_generation_prompt=True
-    )
-    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
-
-    generated_ids = model.generate(
-        **model_inputs,
-        max_new_tokens=512
-    )
-    
-    generated_ids = [
-        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+        {"role": "user", "content": question}
     ]
 
-    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-    return response
+    print("generating ...")
+    response = client.chat.completions.create(
+        model=model_name,  # hosted on HF
+        messages=messages,
+        max_tokens=300,
+        temperature=0.1,
+    )
+    return response.choices[0].message.content.strip()
 
-def chat(model, tokenizer, query, case):
+# links query routing and answering
+def chat(client, model_name, query, case):
     yield "Analysing query ..."
-    role = route_query(model, tokenizer, query)
-    
+    role = llm_route_query(client, model_name, query)
+    print(role)
     yield "Getting relevant context ..."
     context = case['roles'].get(role, "")
     invalid_flag = False
@@ -92,7 +65,6 @@ def chat(model, tokenizer, query, case):
         yield "thinking ..."
     else:
         yield f"Analyzing {role} ..."
-        
-    for chunk in answer(model, tokenizer, case, context, query).split(" "):
-        yield chunk + " "
     
+    for chunk in answer(client, model_name, case, context, query).split(" "):
+        yield chunk + " "
