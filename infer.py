@@ -4,7 +4,8 @@ import torch
 from sentence_transformers import SentenceTransformer
 from torch.nn.functional import cosine_similarity
 
-
+# SG_cases\\processed_v3
+# /mount/src/lawvis/SG_cases/processed_v3
 # takes in text and returns normalised DELTA sentence embedding
 def get_delta_embeddings(delta_model, delta_tokenizer, text):
     # load DELTA tokenizer and model

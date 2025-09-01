@@ -3,6 +3,7 @@ from infer import *
 from chat import *
 import time
 
+st.set_page_config(page_title="Lawvis", initial_sidebar_state="expanded")
 model, tokenizer = load_model()
 # show a case in search results
 def show_case(case, sim_score):
@@ -91,7 +92,6 @@ def case_page():
         st.session_state.selected_case = None
         st.session_state.chat_history = []
     case = st.session_state.selected_case
-    st.set_page_config(page_title=f"{case['title']}", initial_sidebar_state="expanded")
     chatbot_sidebar(case)
     st.button("Back", on_click=go_back)
     st.markdown(f"<h4 style='text-align:center;'>{case['case_id']}</h4>", unsafe_allow_html=True)
@@ -104,7 +104,6 @@ def case_page():
 
 # home page for search
 def search_page():
-    st.set_page_config(page_title="Lawvis")
     
     if "query" not in st.session_state:
         st.session_state.query = ""

@@ -3,7 +3,7 @@ import streamlit as st
 
 @st.cache_resource
 def load_model():
-    model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+    model_name = "Qwen/Qwen2.5-1.5B-Instruct-GPTQ-Int4"
     print(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
