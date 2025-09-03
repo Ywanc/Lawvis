@@ -59,7 +59,6 @@ def chatbot_sidebar(case):
     
     with st.sidebar:
         st.title("Lawvis Case QnA")
-        st.write(f"model: {model_name}")
         # Display chat history
         chat_container = st.container()
         with chat_container:
